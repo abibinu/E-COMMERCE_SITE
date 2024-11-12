@@ -1,0 +1,16 @@
+shoe_id
+name
+brand
+description
+price
+image
+category
+gender
+style
+features
+stock_quantity
+color
+size
+material
+created_at
+updated_at
