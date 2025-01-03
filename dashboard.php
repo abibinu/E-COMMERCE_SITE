@@ -21,6 +21,18 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
+// Check if the form to update order status has been submitted
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['order_id']) && isset($_POST['order_status'])) {
+    $order_id = $_POST['order_id'];
+    $order_status = $_POST['order_status'];
+
+    // Update the order status in the database
+    $update_sql = "UPDATE orders SET order_status = ? WHERE order_id = ?";
+    $update_stmt = $conn->prepare($update_sql);
+    $update_stmt->bind_param("si", $order_status, $order_id);
+    $update_stmt->execute();
+}
+
 // Retrieve user data
 $sql = "SELECT * FROM users WHERE username = ?";
 $stmt = $conn->prepare($sql);
@@ -78,34 +90,48 @@ $wishlist_result = $stmt->get_result();
                 </ul>
             </div>
             <?php if ($row['account_type'] === 'user'): ?>
-                <div class="order-history">
-                    <h2 style="margin-bottom: 20px;">Order History</h2>
-                    <ul>
-                        <?php
-                        if ($order_result->num_rows > 0) {
-                            while ($order_row = $order_result->fetch_assoc()) {
-                                echo "<li>Order #" . $order_row['order_id'] . " - Date: " . $order_row['order_date'] . " - Status: " . $order_row['order_status'] . "</li>";
-                            }
-                        } else {
-                            echo "<li>No orders yet</li>";
-                        }
-                        ?>
-                    </ul>
-                </div>
-                <div class="wishlist">
-                    <h2 style="margin-bottom: 20px;">Wishlist</h2>
-                    <ul>
-                        <?php
-                        if ($wishlist_result->num_rows > 0) {
-                            while ($wishlist_row = $wishlist_result->fetch_assoc()) {
-                                echo "<a href='productdetails.php?id=" . $wishlist_row['shoe_id'] . "'>" . $wishlist_row['product_name'] . "</a><br>";
-                            }
-                        } else {
-                            echo "<li>No items yet</li>";
-                        }
-                        ?>
-                    </ul>
-                </div>
+    <div class="order-history">
+        <h2 style="margin-bottom: 20px;">Order History</h2>
+        <ul>
+            <?php
+            if ($order_result->num_rows > 0) {
+                // Update the SQL query to join with product_details
+                $sql = "SELECT o.order_id, o.order_date, o.order_status, p.name AS shoe_name, p.shoe_id 
+                        FROM orders o 
+                        JOIN product_details p ON o.product_id = p.shoe_id 
+                        WHERE o.user_id = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $row['user_id']);
+                $stmt->execute();
+                $order_result = $stmt->get_result();
+
+                while ($order_row = $order_result->fetch_assoc()) {
+                    // Create a link to the product details page
+                    echo "<li>Order #" . $order_row['order_id'] . " - Shoe: <a href='productdetails.php?id=" . $order_row['shoe_id'] . "'>" . $order_row['shoe_name'] . "</a> - Date: " . $order_row['order_date'] . " - Status: " . $order_row['order_status'] . "</li>";
+                }
+            } else {
+                echo "<li>No orders yet</li>";
+            }
+            ?>
+        </ul>
+    </div>
+
+
+    <div class="wishlist">
+        <h2 style="margin-bottom: 20px;">Wishlist</h2>
+        <ul>
+            <?php
+            if ($wishlist_result->num_rows > 0) {
+                while ($wishlist_row = $wishlist_result->fetch_assoc()) {
+                    echo "<li>" . $wishlist_row['product_name'] . " <a style='color: green;' href='productdetails.php?id=" . $wishlist_row['shoe_id'] . "'>View</a> ";
+                    echo "<a style='color: red;' href='remove_from_wishlist.php?item_id=" . $wishlist_row['shoe_id'] . "' onclick='return confirm(\"Are you sure you want to remove this item from your wishlist?\");'>Remove</a></li>";
+                }
+            } else {
+                echo "<li>No items yet</li>";
+            }
+            ?>
+        </ul>
+    </div>
                 <a class='logout' href="logout.php">LOGOUT</a>
 
             <?php elseif ($row['account_type'] === 'admin'): ?>
@@ -113,9 +139,9 @@ $wishlist_result = $stmt->get_result();
                 <div class="editing-tools">
                     <h2 style="margin-bottom: 20px">Editing Tools</h2>
                     <ul>
-                        <li><a href="addproduct.php">Add Product</a></li>
-                        <li><a href="editproduct.php">Edit Product</a></li>
-                        <li><a href="deleteproduct.php">Delete Product</a></li>
+                        <li><a href="insert.php">Add Product</a></li>
+                        <li><a href="products.php">Edit Product</a></li>
+                        <li><a href="products.php">Delete Product</a></li>
                     </ul>
                 </div>
                 <div class="most-searched">
@@ -137,31 +163,53 @@ $wishlist_result = $stmt->get_result();
                     </ul>
                 </div>
                 <div class="most-sold">
-                    <h2 style="margin-bottom: 20px;">Most Sold Items</h2>
+    <h2 style="margin-bottom: 20px;">Most Sold Items</h2>
+    <ul>
+        <?php
+        $sql = "SELECT product_id, COUNT(*) as count FROM orders GROUP BY product_id ORDER BY count DESC LIMIT 5";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+        $sold_result = $stmt->get_result();
+        if ($sold_result->num_rows > 0) {
+            while ($sold_row = $sold_result->fetch_assoc()) {
+                // Get product name and shoe_id from product_details table
+                $sql = "SELECT name, shoe_id FROM product_details WHERE shoe_id = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $sold_row['product_id']);
+                $stmt->execute();
+                $product_result = $stmt->get_result();
+                if ($product_result->num_rows > 0) {
+                    $product_row = $product_result->fetch_assoc();
+                    $product_name = $product_row['name'];
+                    $shoe_id = $product_row['shoe_id'];
+                    echo "<li><a href='productdetails.php?id=" . $shoe_id . "'>" . $product_name . "</a> (" . $sold_row['count'] . " sales)</li>";
+                } else {
+                    echo "<li>No product name found</li>";
+                }
+            }
+        } else {
+            echo "<li>No items yet</li>";
+        }
+        ?>
+    </ul>
+</div>
+                 <!-- New section to display all orders with user IP addresses -->
+                 <div class="order-history">
+                    <h2 style="margin-bottom: 20px;">All User Orders</h2>
+                    <a href="generate_report.php" class="generate-report-button">Generate Report</a>
                     <ul>
                         <?php
-                        $sql = "SELECT product_id, COUNT(*) as count FROM orders GROUP BY product_id ORDER BY count DESC LIMIT 5";
+                        $sql = "SELECT o.order_id, o.order_date, o.order_status, u.username, o.ip FROM orders o JOIN users u ON o.user_id = u.user_id";
                         $stmt = $conn->prepare($sql);
                         $stmt->execute();
-                        $sold_result = $stmt->get_result();
-                        if ($sold_result->num_rows > 0) {
-                            while ($sold_row = $sold_result->fetch_assoc()) {
-                                // Get product name from product_details table
-                                $sql = "SELECT name FROM product_details WHERE shoe_id = ?";
-                                $stmt = $conn->prepare($sql);
-                                $stmt->bind_param("i", $sold_row['product_id']);
-                                $stmt->execute();
-                                $product_result = $stmt->get_result();
-                                if ($product_result->num_rows > 0) {
-                                    $product_row = $product_result->fetch_assoc();
-                                    $product_name = $product_row['name'];
-                                    echo "<li>" . $product_name . " (" . $sold_row['count'] . " sales)</li>";
-                                } else {
-                                    echo "<li>No product name found</li>";
-                                }
+                        $orders_result = $stmt->get_result();
+                        if ($orders_result->num_rows > 0) {
+                            while ($order_row = $orders_result->fetch_assoc()) {
+                                echo "<li>Order #" . $order_row['order_id'] . " - User: " . $order_row['username'] . " - Date: " . $order_row['order_date'] . " - Status: " . $order_row['order_status'] . " - IP Address: " . $order_row['ip'] . " ";
+                                echo "<a href='update_order_status.php?order_id=" . $order_row['order_id'] . "'>Update Status</a></li>";
                             }
                         } else {
-                            echo "<li>No items yet</li>";
+                            echo "<li>No orders found</li>";
                         }
                         ?>
                     </ul>

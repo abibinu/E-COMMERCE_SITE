@@ -25,6 +25,12 @@ $sql = "SELECT * FROM product_details WHERE shoe_id = '$product_id'";
 $res = mysqli_query($conn, $sql);
 if (mysqli_num_rows($res) > 0) {
     $row = mysqli_fetch_assoc($res);
+    
+    // Check if the product is in stock
+    if ($row['stock_quantity'] <= 0) {
+        echo "<script>alert('This product is currently out of stock.'); window.location.href='products.php';</script>";
+        exit;
+    }
 } else {
     echo "Product not found.";
     exit;
@@ -33,29 +39,40 @@ if (mysqli_num_rows($res) > 0) {
 // Check if the user has already placed an order for this product
 $sql_check_order = "SELECT * FROM orders WHERE user_id = '".$_SESSION['user_id']."' AND product_id = '$product_id' AND order_status = 'pending'";
 $res_check_order = mysqli_query($conn, $sql_check_order);
-/*    if (mysqli_num_rows($res_check_order) > 0) {
-        echo "You have already placed an order for this product.";
-        exit;
-    }
-*/
+if (mysqli_num_rows($res_check_order) > 0) {
+    echo "<script>alert('You have already placed an order for this product.'); window.location.href='products.php';</script>";
+    exit;
+}
 
 // Handle order placement
 if (isset($_POST['place_order'])) {
+    // Check stock again before placing the order
+    $sql_check_stock = "SELECT stock_quantity FROM product_details WHERE shoe_id = '$product_id'";
+    $res_check_stock = mysqli_query($conn, $sql_check_stock);
+    $stock_row = mysqli_fetch_assoc($res_check_stock);
+    
+    if ($stock_row['stock_quantity'] <= 0) {
+        echo "This product is currently out of stock.";
+        exit;
+    }
+
+    // Proceed with order placement
     $user_id = $_SESSION['user_id'];
-    $product_id = $_POST['product_id'];
     $address = $_POST['address'];
     $city = $_POST['city'];
     $state = $_POST['state'];
     $pincode = $_POST['pincode'];
     $mobile = $_POST['mobile'];
     $payment_method = 'Cash on Delivery';
-    $order_id = uniqid(); // Generate a unique order ID
     $order_date = date('Y-m-d H:i:s'); // Get the current date and time
     $ip = $_SERVER['REMOTE_ADDR']; // Get the IP address of the ordering device
 
     // Insert order into database
-    $sql_order = "INSERT INTO orders (order_id, user_id, order_date, product_id, address, city, state, pincode, mobile, ip, order_status) VALUES ('$order_id', '$user_id', '$order_date', '$product_id', '$address', '$city', '$state', '$pincode', '$mobile', '$ip', 'pending')";
+    $sql_order = "INSERT INTO orders (user_id, order_date, product_id, address, city, state, pincode, mobile, ip, order_status) VALUES ('$user_id', '$order_date', '$product_id', '$address', '$city', '$state', '$pincode', '$mobile', '$ip', 'pending')";
     mysqli_query($conn, $sql_order);
+
+    // Get the last inserted order ID
+    $order_id = mysqli_insert_id($conn);
 
     // Update product stock quantity
     $sql_update_stock = "UPDATE product_details SET stock_quantity = stock_quantity - 1 WHERE shoe_id = '$product_id'";

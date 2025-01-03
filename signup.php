@@ -27,7 +27,7 @@ if (isset($_POST['submit'])) {
     $user_id = uniqid();
 
     // Query to insert user data
-    $sql = "INSERT INTO users (user_id, username, email, password, account_type) VALUES ('$user_id', '$username', '$email', '$password', '$account_type')";
+    $sql = "INSERT INTO users (user_id, username, email, password, account_type) VALUES ('$user_id', '$username', '$email', '$password', 'user')";
     $res = mysqli_query($conn, $sql);
 
     if ($res) {
@@ -74,11 +74,11 @@ if (isset($_POST['submit'])) {
             <input type="email" id="email" name="email" required><br><br>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required><br><br>
-            <label for="account_type">Account Type:</label>
+            <!-- <label for="account_type">Account Type:</label>
             <select id="account_type" name="account_type" required>
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
-            </select><br><br>
+            </select><br><br> -->
             <input type="submit" name="submit" value="Sign up">
             <?php if (isset($error)) { echo '<p style="color: red;">' . $error . '</p>'; } ?>
         </form>

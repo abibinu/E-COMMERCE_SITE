@@ -16,7 +16,10 @@ if (!$conn) {
     die("Not Connected");
 }
 
-$sql = "SELECT * FROM orders WHERE order_id = '$order_id'";
+$sql = "SELECT orders.*, product_details.name AS product_name, product_details.price AS product_price 
+        FROM orders 
+        JOIN product_details ON orders.product_id = product_details.shoe_id 
+        WHERE orders.order_id = '$order_id'";
 $res = mysqli_query($conn, $sql);
 if (mysqli_num_rows($res) > 0) {
     $row = mysqli_fetch_assoc($res);
@@ -50,16 +53,19 @@ if (mysqli_num_rows($res) > 0) {
         <h1 style="font-size: 70px; color: transparent;">dydyd</h1>
     </section>
     <div id="order-placed">
-        <h2>Order Placed Successfully!</h2>
-        <p>Order ID: <?php echo $order_id; ?></p>
-        <p>Product: #<?php echo $row['product_id']; ?></p>
-        <p>Address: <?php echo $row['address']; ?>, <?php echo $row['city']; ?>, <?php echo $row['state']; ?> - <?php echo $row['pincode']; ?></p>
-        <p>Mobile: <?php echo $row['mobile']; ?></p>
-        <p>Payment Method: Cash on Delivery</p>
-        <p>Order Status: Pending</p>
-        <p>Thank you for your order. Our team will process your order soon.</p>
-        <a href="products.php">Continue Shopping</a>
-    </div>
+    <h2>Order Placed Successfully!</h2>
+    <p>Order ID: <?php echo $order_id; ?></p>
+    <p>Product: <?php echo $row['product_name']; ?></p>
+    <p>Price: $<?php echo $row['product_price']; ?></p>
+    <p>Address: <?php echo $row['address']; ?>, <?php echo $row['city']; ?>, <?php echo $row['state']; ?> - <?php echo $row['pincode']; ?></p>
+    <p>Mobile: <?php echo $row['mobile']; ?></p>
+    <p>Payment Method: Cash on Delivery</p>
+    <p>Order Status: Pending</p>
+    <p>Thank you for your order. Our team will process your order soon.</p>
+    <a style="color: orange;" href="products.php">Continue Shopping</a>
+    <br>
+    <a style="color: green;" href="generate_invoice.php?order_id=<?php echo $order_id; ?>">Download Invoice</a>
+</div>
 
 </body>
 </html>

@@ -145,3 +145,69 @@ li{
     margin-left: 40px;
     max-width: 90%;
 }
+
+.generate-report-button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    background-color: #4CAF50; /* Green */
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.generate-report-button:hover {
+    background-color: #45a049; /* Darker green */
+}
+
+/* Style for the update button */
+input[type="submit"] {
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+    border: none; /* No border */
+    padding: 10px 15px; /* Some padding */
+    text-align: center; /* Centered text */
+    text-decoration: none; /* No underline */
+    display: inline-block; /* Inline-block for proper spacing */
+    font-size: 16px; /* Larger font size */
+    margin: 4px 2px; /* Margin for spacing */
+    cursor: pointer; /* Pointer cursor on hover */
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+/* Change background color on hover */
+input[type="submit"]:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+
+/* Style for the dropdown menu */
+select {
+    padding: 10px; /* Padding for the dropdown */
+    font-size: 16px; /* Font size */
+    border: 1px solid #ccc; /* Light gray border */
+    border-radius: 5px; /* Rounded corners */
+    background-color: #fff; /* White background */
+    transition: border-color 0.3s; /* Smooth transition */
+}
+
+/* Change border color on focus */
+select:focus {
+    border-color: #4CAF50; /* Green border on focus */
+    outline: none; /* Remove outline */
+}
+
+#update-order-status{
+    box-shadow: 5px 5px 15px rgba(0, 0, 0);
+    background-color:rgba(0, 0, 0, 0.5) ;
+    border: 1px solid rgb(120, 120, 120);
+    padding: 20px;
+    border-radius: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 60px auto;
+    text-align: center;
+    color: white;
+}
+

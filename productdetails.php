@@ -23,6 +23,11 @@
             <h1 style="font-size: 70px; color: transparent;">dydyd</h1>
         </section>
         <a href="products.php"><img id="back" src="image/back.png"></a>
+        <script>
+        function confirmDelete() {
+            return confirm('Are you sure you want to delete this product?');
+        }
+        </script>
     </body>
 </html>
 
@@ -121,12 +126,29 @@ if (mysqli_num_rows($res) > 0) {
 
                 // Delete product form for admin
                 echo "<section id='deleteproductbox'>";
-                echo "<form style='margin-top: 10px;margin-left: 90px;' action='".$_SERVER['PHP_SELF']."' method='post'>";
+                echo "<form style='margin-top: 10px;margin-left: 90px;' action='".$_SERVER['PHP_SELF']."' method='post' onsubmit='return confirmDelete();'>";
                 echo "<input type='hidden' name='product_id' value='".$product_id."'>";
                 echo "<button id='deleteproduct' type='submit' name='delete_product'>Delete Product</button>";
                 echo "</form>";
                 echo "</section>";
 
+            echo "<section id='offerbox'>";    
+                // Add Offer form for admin
+                echo "<section id='addofferbox'>";
+                echo "<form style='margin-top: 10px;margin-left: 90px;' action='".$_SERVER['PHP_SELF']."' method='post'>";
+                echo "<input type='hidden' name='product_id' value='".$product_id."'>";
+                echo "<button id='addoffer' type='submit' name='add_offer'>Add Offer</button>";
+                echo "</form>";
+                echo "</section>";
+
+                // Remove Offer form for admin
+                echo "<section style='margin-left: -60px;' id='removeofferbox'>";
+                echo "<form style='margin-top: 10px;margin-left: 90px;' action='".$_SERVER['PHP_SELF']."' method='post'>";
+                echo "<input type='hidden' name='product_id' value='".$product_id."'>";
+                echo "<button id='removeoffer' type='submit' name='remove_offer'>Remove Offer</button>";
+                echo "</form>";
+                echo "</section>";
+            echo "</section>";    
             } else {
                 // Buy now and add to cart buttons for regular users
                 echo "<section id='buynowbox'>";
@@ -147,39 +169,68 @@ if (mysqli_num_rows($res) > 0) {
         echo "</section>";
 
     echo "</section>";
+// Retrieve the user's ID
+$username = $_SESSION['username'];
+$sql = "SELECT user_id FROM users WHERE username = '$username'";
+$result = mysqli_query($conn, $sql);
 
-    echo "<section class='reviews'>";
-        if(isset($user['account_type'])){
-            if ($user['account_type'] === 'user') {
-                // Add review section for users
-                echo "<section id='reviewbox'>";
-                echo "<h2 style='margin-left: 130px; margin-top: 50px;'>Add a Review</h2>";
-                echo "<form action='".$_SERVER['PHP_SELF']."' method='post'>";
-                echo "<input type='hidden' name='product_id' value='".$product_id."'>";
-                echo "<textarea id='review' name='review' placeholder='Write your review...'></textarea><br>";
-                echo "<button id='addreview' type='submit' name='add_review'><b>Add</b></button>";
-                echo "</form>";
-                echo "</section>";
-
-                // Display reviews for users
-                echo "<section id='reviewbox'>";
-                echo "<h2 style='margin-left: 120px; margin-top: 30px; margin-bottom: 30px;'>Reviews:</h2>";
-                $sql_reviews = "SELECT * FROM reviews WHERE shoe_id = '$product_id'";
-                $res_reviews = mysqli_query($conn, $sql_reviews);
-                if (mysqli_num_rows($res_reviews) < 1) {
-                    echo "<p style='margin-left: 120px;margin-bottom: 30px;'>No reviews yet</p>";
-                }else{
-                    while ($row_reviews = mysqli_fetch_assoc($res_reviews)) {
-                        echo "<section id='reviewlist'>";
-                            echo "<h3 style='margin-left: 10px;margin-bottom: 10px;'>" . $row_reviews['username'] . "</h3>";
-                            echo "<p style='margin-left: 10px; margin-bottom: 10px;'>" . $row_reviews['review'] . "</p>";
-                        echo "</section>";   
-                }
-            }
-        }
-
-    echo "</section>";
+if (mysqli_num_rows($result) > 0) {
+    $row = mysqli_fetch_assoc($result);
+    $user_id = $row["user_id"];
+} else {
+    // handle the case where the username is not found
+    echo "Username not found";
+    exit;
 }
+
+// Check purchase history
+$sql_check_purchase = "SELECT * FROM orders WHERE user_id = '$user_id' AND product_id = '$product_id'";
+$res_check_purchase = mysqli_query($conn, $sql_check_purchase);
+
+
+echo "<section class='reviews'>";
+
+if (isset($user['account_type'])) {
+    // Display reviews for users
+    echo "<section id='reviewbox'>";
+    echo "<h2 style='margin-left: 120px; margin-top: 30px; margin-bottom: 30px;'>Reviews:</h2>";
+    $sql_reviews = "SELECT * FROM reviews WHERE shoe_id = '$product_id'";
+    $res_reviews = mysqli_query($conn, $sql_reviews);
+    if (mysqli_num_rows($res_reviews) < 1) {
+        echo "<p style='margin-left: 120px;margin-bottom: 30px;'>No reviews yet</p>";
+    } else {
+        while ($row_reviews = mysqli_fetch_assoc($res_reviews)) {
+            echo "<section id='reviewlist'>";
+            echo "<h3 style='margin-left: 10px;margin-bottom: 10px;'>" . $row_reviews['username'] . "</h3>";
+            echo "<p style='margin-left: 10px; margin-bottom: 10px;'>" . $row_reviews['review'] . "</p>";
+            echo "</section>";
+        }
+    }
+    echo "</section>";
+
+    // Check if the user has purchased the product
+    if (mysqli_num_rows($res_check_purchase) > 0 && $user['account_type'] !== 'admin') {
+        // Add review section for users who bought the product
+        echo "<section id='reviewbox'>";
+        echo "<h2 style='margin-left: 130px; margin-top: 50px;'>Add a Review</h2>";
+        echo "<form style='margin-bottom: 30px;' action='" . $_SERVER['PHP_SELF'] . "' method='post'>";
+        echo "<input type='hidden' name='product_id' value='" . $product_id . "'>";
+        echo "<textarea id='review' name='review' placeholder='Write your review...'></textarea><br>";
+        echo "<button id='addreview' type='submit' name='add_review'><b>Add</b></button>";
+        echo "</form>";
+        echo "</section>";
+    } else {
+       
+            echo "<p style='margin-left: 120px; margin-bottom: 30px; color: red;'>You must purchase this product to leave a review.</p>";
+        
+    }
+} else {
+    echo "<h3 id='loginfirst'>Please <a href='login.php'>login</a> or <a href='signup.php'>signup</a> first to buy!</h3>";
+    exit;
+}
+
+echo "</section>";
+
 
 $username = $_SESSION['username'];
 $sql = "SELECT user_id FROM users WHERE username = '$username'";
@@ -192,6 +243,32 @@ if (mysqli_num_rows($result) > 0) {
     // handle the case where the username is not found
     echo "Username not found";
     exit;
+}
+
+if(isset($_POST['add_offer'])){
+    $shoe_id = $_POST['product_id'];
+
+    $sql_add_offer = "UPDATE product_details SET offer = 1 WHERE shoe_id = '$shoe_id'";
+    $res_add_offer = mysqli_query($conn, $sql_add_offer);
+
+    if($res_add_offer){
+        echo "<script>alert('Offer added successfully');</script>";
+    }else{
+        echo "<script>alert('Failed to add offer');</script>";
+    }
+}
+
+if(isset($_POST['remove_offer'])){
+    $shoe_id = $_POST['product_id'];
+
+    $sql_remove_offer = "UPDATE product_details SET offer = 0 WHERE shoe_id = '$shoe_id'";
+    $res_remove_offer = mysqli_query($conn, $sql_remove_offer);
+
+    if($res_remove_offer){
+        echo "<script>alert('Offer removed successfully');</script>";
+    }else{
+        echo "<script>alert('Failed to remove offer');</script>";
+    }
 }
 
 if(isset($_POST['add_to_cart'])){
@@ -265,15 +342,15 @@ if(isset($_POST['delete_product'])){
 
     $sql_delete_product = "UPDATE product_details SET delete_flag = 1 WHERE shoe_id = '$shoe_id'";
     $res_delete_product = mysqli_query($conn, $sql_delete_product);
-
-    if($res_delete_product){
-        echo "<script>alert('Product deleted successfully');</script>";
-        // Redirect to products page after deletion
-        header('Location: products.php');
-        exit;
-    }else{
-        echo "<script>alert('Failed to delete product');</script>";
-    }
+    
+        if($res_delete_product){
+            echo "<script>alert('Product deleted successfully');</script>";
+            // Redirect to products page after deletion
+            header('Location: products.php');
+            exit;
+        }else{
+            echo "<script>alert('Failed to delete product');</script>";
+        }
 }
 
 ?>
