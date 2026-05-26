@@ -236,5 +236,5 @@ You can test the application functions using these pre-seeded accounts included 
 
 *   **Project Title:** THE FIND — Shoe E-Commerce Website
 *   **Course:** Bachelor of Computer Applications (BCA)
-*   **Project Classification:** BCA Mini Project (Semester IV / V)
+*   **Project Classification:** BCA Mini Project (Semester V)
 *   **Primary Technologies:** PHP, MySQL, CSS, FPDF
