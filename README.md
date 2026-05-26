@@ -8,7 +8,7 @@
 
 ---
 
-## 📖 Table of Contents
+##  Table of Contents
 1. [Key Features](#-key-features)
 2. [Technology Stack](#-technology-stack)
 3. [Database Architecture](#-database-architecture)
@@ -19,9 +19,9 @@
 
 ---
 
-## 🌟 Key Features
+##  Key Features
 
-### 👤 Customer Portal
+###  Customer Portal
 *   **User Authentication & Security:** Secure registration (`signup.php`) and login (`login.php`) powered by PHP sessions.
 *   **Dynamic Catalog Browsing:** View available shoes (`products.php`) with real-time stock status display (e.g., "In Stock", "Only 1 Stock Left", or "Out of Stock").
 *   **Search & Multi-Level Filtering:** 
@@ -33,7 +33,7 @@
 *   **Order Checkout:** Easy checkout page supporting Cash on Delivery (CoD) with real-time address validation, stock verification, and duplicate order prevention.
 *   **PDF Invoice Generation:** Automated billing invoice (`generate_invoice.php`) using the FPDF library, downloadable instantly upon placing an order.
 
-### 🛡️ Administrative Control Panel
+###  Administrative Control Panel
 *   **CRUD Inventory Management:** Insert, view, update, and soft-delete products (`insert.php` & `products.php`).
 *   **Business Intelligence & Analytics:**
     *   **Most Searched Items:** Tracks and displays high-frequency search keywords to analyze customer interest.
@@ -45,7 +45,7 @@
 
 ---
 
-## 💻 Technology Stack
+##  Technology Stack
 
 *   **Frontend:** HTML5, CSS3 (Custom styling via dedicated `.css` modules), and JavaScript (for interactive client greeting alerts).
 *   **Backend:** PHP (Object-oriented and procedural mysqli database interactions).
@@ -54,7 +54,7 @@
 
 ---
 
-## 🗄️ Database Architecture
+##  Database Architecture
 
 The system utilizes a relational database structure designed to enforce integrity rules with foreign key constraints.
 
@@ -141,7 +141,7 @@ erDiagram
 
 ---
 
-## 📂 File & Directory Structure
+##  File & Directory Structure
 
 ```text
 E-COMMERCE_SITE/
@@ -194,7 +194,7 @@ E-COMMERCE_SITE/
 
 ---
 
-## ⚙️ Prerequisites & Installation
+##  Prerequisites & Installation
 
 ### Prerequisites
 *   A local server environment supporting PHP (7.4+ or 8.x) and MySQL. Recommended software: **XAMPP**, **WAMP**, or **MAMP**.
@@ -220,7 +220,7 @@ E-COMMERCE_SITE/
 
 ---
 
-## 🔑 Usage & Test Accounts
+##  Usage & Test Accounts
 
 You can test the application functions using these pre-seeded accounts included in the database:
 
@@ -232,7 +232,7 @@ You can test the application functions using these pre-seeded accounts included 
 
 ---
 
-## 🎓 Academic Metadata
+##  Academic Metadata
 
 *   **Project Title:** THE FIND — Shoe E-Commerce Website
 *   **Course:** Bachelor of Computer Applications (BCA)
